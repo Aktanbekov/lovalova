@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // Pages here are per-visitor (drafts, orders), so we use the classic
+  // dynamic rendering model rather than Cache Components.
+  serverExternalPackages: ["playwright-core", "stripe"],
   turbopack: {
     rules: {
       "*.css": {
