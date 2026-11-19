@@ -4,7 +4,10 @@ import fs from "node:fs";
 import path from "node:path";
 
 function open(): DatabaseSync {
-  const file = path.resolve(/* turbopackIgnore: true */ process.cwd(), process.env.DATABASE_PATH || "data/lovalova.db");
+  // Vercel's filesystem is read-only except /tmp, and /tmp is per-instance and wiped on cold start.
+  // That keeps a preview deploy running, but real data needs a hosted database (see README → Deploy).
+  const fallback = process.env.VERCEL ? "/tmp/lovalova/lovalova.db" : "data/lovalova.db";
+  const file = path.resolve(/* turbopackIgnore: true */ process.cwd(), process.env.DATABASE_PATH || fallback);
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const db = new DatabaseSync(file);
   db.exec(`
@@ -56,5 +59,13 @@ function open(): DatabaseSync {
   return db;
 }
 
+/** Later schema additions. Idempotent; runs on every module load (also after a dev reload). */
+function migrate(db: DatabaseSync) {
+  const userCols = db.prepare("PRAGMA table_info(users)").all() as { name: string }[];
+  if (!userCols.some((c) => c.name === "google_sub")) db.exec("ALTER TABLE users ADD COLUMN google_sub TEXT");
+  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS users_google ON users(google_sub)");
+}
+
 const g = globalThis as unknown as { __lovalovaDb?: DatabaseSync };
 export const db: DatabaseSync = g.__lovalovaDb ?? (g.__lovalovaDb = open());
+migrate(db);

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { EditStep } from "@/components/builder/EditStep";
 import { loadOwnedBook } from "@/lib/loadBook";
 
-export const metadata = { title: "Edit pages" };
+export const metadata = { title: "Страницы" };
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { PreviewStep } from "@/components/builder/PreviewOptionsSteps";
 import { loadOwnedBook } from "@/lib/loadBook";
 
-export const metadata = { title: "Preview" };
+export const metadata = { title: "Просмотр" };
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

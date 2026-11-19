@@ -9,11 +9,10 @@ import { ensureOwner, readOwner } from "@/lib/owner";
 import { z } from "zod";
 import { cookies } from "next/headers";
 import { createBookWith, createOrder, getBook, getOrder, saveBookData, setOrderSession, markOrderPaid, type BookRow } from "@/lib/store";
-import { AnswersSchema, BookDataSchema, BookPatchSchema, LIMITS, defaultBook } from "@/lib/book/schema";
+import { AnswersSchema, BookDataSchema, BookPatchSchema, LIMITS } from "@/lib/book/schema";
+import { bookFromPreset, readPreset, safeNext } from "@/lib/book/preset";
 import { assemblePages } from "@/lib/book/assemble";
 import { getTemplate } from "@/content/pages";
-import { COVERS, OCCASIONS, RELATIONSHIPS } from "@/lib/book/catalog";
-import { ids } from "@/lib/avatar/options";
 import { CURRENCY, SHIPPING, lineItems, totals } from "@/lib/pricing";
 import { findPromo, normalizeCode, type Promo } from "@/lib/promos";
 import {
@@ -35,37 +34,14 @@ type Result<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 async function ownedBook(id: string): Promise<BookRow> {
   const owner = await readOwner();
   const book = typeof id === "string" ? getBook(id) : null;
-  if (!book || !owner || book.owner !== owner) throw new Error("Book not found");
+  if (!book || !owner || book.owner !== owner) throw new Error("Книга не найдена");
   return book;
 }
 
 // ---------- starting a book ----------
 
-const PresetSchema = z.object({
-  occasion: z.enum(ids(OCCASIONS)).optional(),
-  relationship: z.enum(ids(RELATIONSHIPS)).optional(),
-  cover: z.enum(ids(COVERS)).optional(),
-  title: z.string().trim().min(1).max(LIMITS.title).optional(),
-});
-
-function readPreset(form: FormData) {
-  const raw: Record<string, string> = {};
-  for (const k of ["occasion", "relationship", "cover", "title"]) {
-    const v = form.get(k);
-    if (typeof v === "string" && v) raw[k] = v;
-  }
-  const parsed = PresetSchema.safeParse(raw);
-  return parsed.success ? parsed.data : {};
-}
-
 async function startBook(owner: string, form: FormData): Promise<never> {
-  const p = readPreset(form);
-  const data = defaultBook();
-  if (p.occasion) data.occasion = p.occasion;
-  if (p.relationship) data.relationship = p.relationship;
-  if (p.cover) data.cover.id = p.cover;
-  if (p.title) data.cover.title = p.title;
-  const book = createBookWith(owner, data);
+  const book = createBookWith(owner, bookFromPreset(readPreset((k) => form.get(k))));
   refreshHeader();
   redirect(`/create/${book.id}/characters`);
 }
@@ -81,14 +57,11 @@ export type AuthState = { error?: string } | null;
 
 const AuthSchema = z.object({
   mode: z.enum(["signin", "signup"]),
-  email: z.email("Please enter a valid email address.").max(200),
-  password: z.string().min(8, "Passwords need at least 8 characters.").max(200),
+  email: z.email("Введите корректный e-mail.").max(200),
+  password: z.string().min(8, "Пароль должен быть не короче 8 символов.").max(200),
   name: z.string().trim().max(60).optional(),
 });
 
-function safeNext(v: FormDataEntryValue | null): string {
-  return typeof v === "string" && v.startsWith("/") && !v.startsWith("//") ? v : "/account";
-}
 
 /**
  * Sign in or create an account. With next=start it then starts a new book
@@ -101,17 +74,17 @@ export async function authAction(_prev: AuthState, form: FormData): Promise<Auth
     password: form.get("password"),
     name: form.get("name") || undefined,
   });
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Please check your details." };
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Проверьте данные." };
   const { mode, email, password, name } = parsed.data;
   const guestOwner = (await cookies()).get(OWNER_COOKIE)?.value ?? null;
 
   let user;
   if (mode === "signup") {
-    if (findUserByEmail(email)) return { error: "There's already an account with that email. Try signing in." };
+    if (findUserByEmail(email)) return { error: "Аккаунт с таким e-mail уже есть. Попробуйте войти." };
     user = createUser(normalizeEmail(email), password, name || null, guestOwner);
   } else {
     const found = findUserByEmail(email);
-    if (!found || !verifyPassword(password, found.passwordHash)) return { error: "That email and password don't match." };
+    if (!found || !verifyPassword(password, found.passwordHash)) return { error: "Неверный e-mail или пароль." };
     user = found;
     adoptGuestBooks(user, guestOwner);
   }
@@ -134,7 +107,7 @@ export type SubscribeState = { ok: true; code: string } | { ok: false; error: st
 
 export async function subscribeAction(_prev: SubscribeState, form: FormData): Promise<SubscribeState> {
   const email = z.email().max(200).safeParse(form.get("email"));
-  if (!email.success) return { ok: false, error: "Please enter a valid email address." };
+  if (!email.success) return { ok: false, error: "Введите корректный e-mail." };
   addSubscriber(email.data, String(form.get("source") ?? "site").slice(0, 40));
   return { ok: true, code: "WELCOME10" };
 }
@@ -148,7 +121,7 @@ export async function applyPromoAction(id: string, code: string | null): Promise
     return { ok: true };
   }
   const promo = findPromo(code);
-  if (!promo) return { ok: false, error: `“${normalizeCode(code)}” isn't a valid code.` };
+  if (!promo) return { ok: false, error: `Промокод «${normalizeCode(code)}» не найден.` };
   saveBookData(id, { ...book.data, promo: promo.code });
   return { ok: true, promo };
 }
@@ -156,17 +129,17 @@ export async function applyPromoAction(id: string, code: string | null): Promise
 export async function saveBookAction(id: string, patch: unknown): Promise<Result> {
   const book = await ownedBook(id);
   const parsed = BookPatchSchema.safeParse(patch);
-  if (!parsed.success) return { ok: false, error: "Some of those details aren't valid." };
+  if (!parsed.success) return { ok: false, error: "Часть данных заполнена неверно." };
   const p = parsed.data;
   if (p.pages) {
-    if (p.pages.some((pg) => !getTemplate(pg.templateId))) return { ok: false, error: "Unknown page." };
-    if (new Set(p.pages.map((pg) => pg.key)).size !== p.pages.length) return { ok: false, error: "Duplicate page." };
+    if (p.pages.some((pg) => !getTemplate(pg.templateId))) return { ok: false, error: "Неизвестная страница." };
+    if (new Set(p.pages.map((pg) => pg.key)).size !== p.pages.length) return { ok: false, error: "Страница повторяется." };
     if (book.data.assembled && p.pages.length < LIMITS.minPages) {
-      return { ok: false, error: `A book needs at least ${LIMITS.minPages} pages.` };
+      return { ok: false, error: `В книге должно быть не меньше ${LIMITS.minPages} страниц.` };
     }
   }
   const next = BookDataSchema.safeParse({ ...book.data, ...p });
-  if (!next.success) return { ok: false, error: "Couldn't save those changes." };
+  if (!next.success) return { ok: false, error: "Не получилось сохранить изменения." };
   saveBookData(id, next.data);
   return { ok: true };
 }
@@ -175,10 +148,10 @@ export async function saveBookAction(id: string, patch: unknown): Promise<Result
 export async function finishQuizAction(id: string, answers: unknown): Promise<Result> {
   const book = await ownedBook(id);
   const parsed = AnswersSchema.safeParse(answers);
-  if (!parsed.success) return { ok: false, error: "Please check your answers." };
+  if (!parsed.success) return { ok: false, error: "Проверьте ответы." };
   const a = parsed.data;
   if (a.features.length !== LIMITS.features || a.qualities.length !== LIMITS.qualities || a.activities.length !== LIMITS.activities) {
-    return { ok: false, error: "Please finish every question." };
+    return { ok: false, error: "Ответьте на все вопросы." };
   }
   const pages = assemblePages(a, book.data.occasion);
   saveBookData(id, { ...book.data, answers: a, pages, assembled: true, previewed: false });
@@ -187,7 +160,7 @@ export async function finishQuizAction(id: string, answers: unknown): Promise<Re
 
 export async function markPreviewedAction(id: string): Promise<Result> {
   const book = await ownedBook(id);
-  if (!book.data.assembled) return { ok: false, error: "Finish the questions first." };
+  if (!book.data.assembled) return { ok: false, error: "Сначала ответьте на вопросы." };
   saveBookData(id, { ...book.data, previewed: true });
   refreshHeader();
   return { ok: true };
@@ -201,15 +174,15 @@ export async function markPreviewedAction(id: string): Promise<Result> {
 export async function checkoutAction(id: string): Promise<Result<{ url?: string; simulate?: string }>> {
   const book = await ownedBook(id);
   const d = book.data;
-  if (!d.assembled || !d.previewed) return { ok: false, error: "Please preview your book before checking out." };
-  if (d.pages.length < LIMITS.minPages) return { ok: false, error: `A book needs at least ${LIMITS.minPages} pages.` };
-  if (!d.characters[0].name.trim() || !d.characters[1].name.trim()) return { ok: false, error: "Both characters need a name." };
+  if (!d.assembled || !d.previewed) return { ok: false, error: "Перед оплатой посмотрите книгу целиком." };
+  if (d.pages.length < LIMITS.minPages) return { ok: false, error: `В книге должно быть не меньше ${LIMITS.minPages} страниц.` };
+  if (!d.characters[0].name.trim() || !d.characters[1].name.trim()) return { ok: false, error: "Укажите имена обоих героев." };
 
   const promo = findPromo(d.promo);
   const order = createOrder(book, d.selection, totals(d.selection, promo).total);
 
   if (!stripe) {
-    if (process.env.NODE_ENV === "production") return { ok: false, error: "Payments aren't set up yet." };
+    if (process.env.NODE_ENV === "production") return { ok: false, error: "Оплата пока не подключена." };
     return { ok: true, simulate: order.id };
   }
 
@@ -223,7 +196,7 @@ export async function checkoutAction(id: string): Promise<Result<{ url?: string;
         quantity: 1,
         price_data: { currency: CURRENCY, unit_amount: li.cents, product_data: { name: li.label } },
       })),
-      shipping_address_collection: { allowed_countries: ["US", "CA", "GB", "IE", "AU", "NZ", "DE", "FR", "NL"] },
+      shipping_address_collection: { allowed_countries: ["KG", "KZ", "UZ", "RU"] },
       shipping_options: SHIPPING.map((s) => ({
         shipping_rate_data: {
           type: "fixed_amount",
@@ -236,6 +209,7 @@ export async function checkoutAction(id: string): Promise<Result<{ url?: string;
         },
       })),
       ...(promo ? { discounts: [{ coupon: await stripeCoupon(promo) }] } : { allow_promotion_codes: true }),
+      locale: "ru",
       success_url: `${site}/checkout/success?order=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${site}/checkout/cancel?order=${order.id}`,
     });
@@ -243,7 +217,7 @@ export async function checkoutAction(id: string): Promise<Result<{ url?: string;
     return { ok: true, url: session.url ?? undefined };
   } catch (err) {
     console.error("[lovalova] Stripe checkout failed", err);
-    return { ok: false, error: "We couldn't start checkout. Please try again." };
+    return { ok: false, error: "Не получилось открыть оплату. Попробуйте ещё раз." };
   }
 }
 
@@ -253,17 +227,17 @@ async function stripeCoupon(promo: Promo): Promise<string> {
   try {
     await stripe!.coupons.retrieve(id);
   } catch {
-    await stripe!.coupons.create({ id, percent_off: promo.percentOff, duration: "once", name: `${promo.code} — ${promo.label}` });
+    await stripe!.coupons.create({ id, percent_off: promo.percentOff, duration: "once", name: `${promo.code}: ${promo.label}` });
   }
   return id;
 }
 
 /** Development-only stand-in for a Stripe payment. */
 export async function simulatePaymentAction(orderId: string): Promise<Result> {
-  if (process.env.NODE_ENV === "production" || stripe) return { ok: false, error: "Not available." };
+  if (process.env.NODE_ENV === "production" || stripe) return { ok: false, error: "Недоступно." };
   const owner = await readOwner();
   const order = getOrder(orderId);
-  if (!order || order.owner !== owner) return { ok: false, error: "Order not found." };
+  if (!order || order.owner !== owner) return { ok: false, error: "Заказ не найден." };
   markOrderPaid(orderId, {
     email: "test@example.com",
     shipping: { address: { name: "Test Customer", address: { line1: "1 Test Street", city: "Testville", country: "US" } }, rate: "simulated" },

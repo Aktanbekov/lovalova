@@ -14,8 +14,8 @@ export interface Promo {
 }
 
 export const PROMOS: Promo[] = [
-  { code: "LOVE15", percentOff: 15, label: "15% off your book", headline: "Holiday gifting: 15% off every book" },
-  { code: "WELCOME10", percentOff: 10, label: "10% off for joining our list" },
+  { code: "LOVE15", percentOff: 15, label: "скидка 15% на книгу", headline: "Скидка 15% на любую книгу" },
+  { code: "WELCOME10", percentOff: 10, label: "скидка 10% за подписку" },
 ];
 
 /** The code advertised in the announcement bar. */

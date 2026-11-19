@@ -3,7 +3,7 @@ import { StartBookButton } from "./StartBookButton";
 import type { Preset } from "./AuthForm";
 
 export async function CreateButton({
-  label = "Create your book",
+  label = "Создать книгу",
   className = "btn btn-primary",
   preset,
 }: {

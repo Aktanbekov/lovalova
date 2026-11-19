@@ -38,37 +38,37 @@ export function AccountMenu({ user, draftHref }: { user: { email: string; name: 
       <button
         type="button"
         aria-expanded={open}
-        aria-label={user ? "Your account" : "Sign in or create an account"}
+        aria-label={user ? "Мой аккаунт" : "Войти или создать аккаунт"}
         onClick={() => setOpen((v) => !v)}
-        className="grid h-11 w-11 place-items-center rounded-full text-ink transition hover:bg-blush"
+        className="grid h-12 w-12 place-items-center rounded-lg text-ink transition hover:bg-blush lg:h-11 lg:w-11"
       >
         {user ? (
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-brand text-sm font-bold text-white">{initial}</span>
+          <span className="grid h-9 w-9 place-items-center rounded-full bg-brand font-bold text-white lg:h-8 lg:w-8 lg:text-sm">{initial}</span>
         ) : (
-          <UserIcon />
+          <UserIcon className="h-7 w-7 lg:h-6 lg:w-6" />
         )}
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-64 rounded-2xl border border-line bg-white p-2 shadow-xl">
+        <div className="absolute right-0 top-full z-50 mt-2 w-64 rounded-xl border border-line bg-white p-2 shadow-xl">
           {user ? (
             <>
               <p className="px-3 pb-2 pt-1 text-sm text-muted">
-                Signed in as
+                Вы вошли как
                 <span className="block truncate font-semibold text-ink">{user.email}</span>
               </p>
-              <Link href="/account" className={item}>My books &amp; orders</Link>
-              {draftHref && <Link href={draftHref} className={item}>Continue your book</Link>}
+              <Link href="/account" className={item}>Мои книги и заказы</Link>
+              {draftHref && <Link href={draftHref} className={item}>Продолжить книгу</Link>}
               <form action={signOutAction}>
-                <button type="submit" className={`${item} w-full text-left`}>Sign out</button>
+                <button type="submit" className={`${item} w-full text-left`}>Выйти</button>
               </form>
             </>
           ) : (
             <>
-              <Link href={`/account/sign-in?next=${encodeURIComponent(pathname)}`} className="btn btn-primary mb-1 w-full !py-2.5">Sign in</Link>
-              <Link href={`/account/sign-in?mode=signup&next=${encodeURIComponent(pathname)}`} className={`${item} text-center`}>Create an account</Link>
+              <Link href={`/account/sign-in?next=${encodeURIComponent(pathname)}`} className="btn btn-primary mb-1 w-full !py-2.5">Войти</Link>
+              <Link href={`/account/sign-in?mode=signup&next=${encodeURIComponent(pathname)}`} className={`${item} text-center`}>Создать аккаунт</Link>
               <div className="my-1 border-t border-line" />
-              <Link href="/account" className={item}>My books</Link>
-              {draftHref && <Link href={draftHref} className={item}>Continue your book</Link>}
+              <Link href="/account" className={item}>Мои книги</Link>
+              {draftHref && <Link href={draftHref} className={item}>Продолжить книгу</Link>}
             </>
           )}
         </div>

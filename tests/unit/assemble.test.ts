@@ -69,7 +69,7 @@ describe("text", () => {
       const out = fillText(tpl.text, ctx);
       expect(out, tpl.id).not.toMatch(/\{[A-Za-z]+\}/);
     }
-    expect(fillText("{A} loves {B} since {since} ({years})", ctx)).toBe("Alex loves Sam since 2020 (6 years)");
+    expect(fillText("{A} любит {B} с {since} ({years})", ctx)).toBe("Alex любит Sam с 2020 (6 лет)");
   });
 
   it("uses overrides and the dedication", () => {
@@ -79,9 +79,12 @@ describe("text", () => {
 
   it("formats years", () => {
     const now = new Date("2026-03-01");
-    expect(yearsText(2026, now)).toBe("less than a year");
-    expect(yearsText(2025, now)).toBe("1 year");
-    expect(yearsText(2016, now)).toBe("10 years");
+    expect(yearsText(2026, now)).toBe("меньше года");
+    expect(yearsText(2025, now)).toBe("1 год");
+    expect(yearsText(2023, now)).toBe("3 года");
+    expect(yearsText(2016, now)).toBe("10 лет");
+    expect(yearsText(2005, now)).toBe("21 год");
+    expect(yearsText(2015, now)).toBe("11 лет");
     expect(yearsText(null, now)).toBe("");
   });
 

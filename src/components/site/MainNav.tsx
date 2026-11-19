@@ -64,12 +64,12 @@ export function MainNav({ menus, logo, mobileExtra }: { menus: NavMenu[]; logo: 
   return (
     <>
       {/* Mobile trigger */}
-      <button type="button" className="-ml-2 grid h-11 w-11 self-center place-items-center rounded-full text-ink hover:bg-blush lg:hidden" aria-label="Open menu" onClick={() => setDrawer(true)}>
-        <MenuIcon />
+      <button type="button" className="-ml-2 mr-1 grid h-12 w-12 self-center place-items-center rounded-lg text-ink hover:bg-blush lg:hidden" aria-label="Открыть меню" onClick={() => setDrawer(true)}>
+        <MenuIcon className="h-7 w-7" />
       </button>
       {logo}
       {/* Desktop */}
-      <nav aria-label="Shop" className="hidden h-full items-stretch lg:flex" onMouseLeave={leave}>
+      <nav aria-label="Каталог" className="hidden h-full items-stretch lg:flex" onMouseLeave={leave}>
         {menus.map((m, i) =>
           m.columns ? (
             <div key={m.label} className="flex items-stretch" onMouseEnter={() => enter(i)}>
@@ -87,8 +87,8 @@ export function MainNav({ menus, logo, mobileExtra }: { menus: NavMenu[]; logo: 
                   <div className="mx-auto grid max-w-7xl gap-10 px-6 py-8" style={{ gridTemplateColumns: `repeat(${m.columns.length}, minmax(0, 1fr)) ${m.feature ? "minmax(0, 1.25fr)" : ""}` }}>
                     {m.columns.map((col) => (
                       <div key={col.title}>
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand">{col.title}</p>
-                        <ul className="mt-4 space-y-1">
+                        <p className="text-sm font-semibold text-muted">{col.title}</p>
+                        <ul className="mt-3 space-y-1">
                           {col.links.map((l) => (
                             <li key={l.href}>
                               <Link href={l.href} className="-mx-2 block rounded-lg px-2 py-1.5 font-medium text-ink hover:bg-blush hover:text-wine">
@@ -120,12 +120,12 @@ export function MainNav({ menus, logo, mobileExtra }: { menus: NavMenu[]; logo: 
 
 
       {drawer && createPortal(
-        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Меню">
           <div className="absolute inset-0 bg-night/50" onClick={() => setDrawer(false)} />
           <div className="slide-up absolute inset-y-0 left-0 flex w-[88%] max-w-sm flex-col overflow-y-auto bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-line px-5 py-4">
-              <span className="font-display text-xl font-semibold text-wine">Menu</span>
-              <button type="button" className="grid h-10 w-10 place-items-center rounded-full hover:bg-blush" aria-label="Close menu" onClick={() => setDrawer(false)}>
+              <span className="font-display text-xl font-semibold text-wine">Меню</span>
+              <button type="button" className="grid h-10 w-10 place-items-center rounded-full hover:bg-blush" aria-label="Закрыть меню" onClick={() => setDrawer(false)}>
                 <CloseIcon />
               </button>
             </div>
@@ -146,11 +146,11 @@ export function MainNav({ menus, logo, mobileExtra }: { menus: NavMenu[]; logo: 
                       <div className="space-y-4 px-5 pb-5">
                         {m.columns.map((col) => (
                           <div key={col.title}>
-                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand">{col.title}</p>
-                            <ul className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1">
+                            <p className="text-sm font-semibold text-muted">{col.title}</p>
+                            <ul className="mt-1 grid grid-cols-2 gap-x-3 gap-y-1">
                               {col.links.map((l) => (
                                 <li key={l.href}>
-                                  <Link href={l.href} className="block rounded-md py-1.5 font-medium text-ink">
+                                  <Link href={l.href} className="flex min-h-11 items-center rounded-md font-medium text-ink">
                                     {l.label}
                                   </Link>
                                 </li>

@@ -11,9 +11,9 @@ export default async function BuilderLayout({ children, params }: { children: Re
       {!user && (
         <div className="bg-blush">
           <p className="mx-auto max-w-6xl px-4 py-2 text-center text-sm sm:px-6">
-            You&apos;re making this book as a guest — it&apos;s saved in this browser.{" "}
+            Книга сохраняется в этом браузере.{" "}
             <Link href={`/account/sign-in?mode=signup&next=/create/${id}/characters`} className="font-bold text-wine underline underline-offset-2">
-              Save it to an account
+              Сохранить в аккаунт
             </Link>
           </p>
         </div>

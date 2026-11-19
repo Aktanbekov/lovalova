@@ -8,7 +8,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const c = findCollection("occasion", (await params).slug);
-  return { title: c ? `${c.name} love books` : "Not found", description: c?.blurb };
+  return { title: c ? `Книга в подарок: ${c.name}` : "Не найдено", description: c?.blurb };
 }
 
 export default async function OccasionPage({ params }: { params: Promise<{ slug: string }> }) {

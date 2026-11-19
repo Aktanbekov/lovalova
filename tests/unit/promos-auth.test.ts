@@ -24,9 +24,10 @@ describe("promo codes", () => {
 
   it("discounts the book and extras, rounded to the cent", () => {
     const sel = { format: "hardcover" as const, matte: false, digital: true, giftbox: false };
-    expect(totals(sel, null)).toEqual({ subtotal: 7300, discount: 0, total: 7300 });
-    expect(totals(sel, findPromo("LOVE15"))).toEqual({ subtotal: 7300, discount: 1095, total: 6205 });
-    expect(discountCents(4900, findPromo("WELCOME10"))).toBe(490);
+    // 5 490 + 790 = 6 280 сом; 15% off is 942 сом.
+    expect(totals(sel, null)).toEqual({ subtotal: 628000, discount: 0, total: 628000 });
+    expect(totals(sel, findPromo("LOVE15"))).toEqual({ subtotal: 628000, discount: 94200, total: 533800 });
+    expect(discountCents(399000, findPromo("WELCOME10"))).toBe(39900);
   });
 });
 

@@ -4,11 +4,12 @@ import { CheckoutButton } from "@/components/builder/CheckoutButton";
 import { PromoForm } from "@/components/builder/PromoForm";
 import { BookMockup } from "@/components/book/BookMockup";
 import { findPromo } from "@/lib/promos";
+import { count } from "@/lib/ru";
 import { loadOwnedBook } from "@/lib/loadBook";
 import { SHIPPING, lineItems, money, totals } from "@/lib/pricing";
 import { stepHref } from "@/lib/book/steps";
 
-export const metadata = { title: "Your cart" };
+export const metadata = { title: "Корзина" };
 
 export default async function CartPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -21,25 +22,25 @@ export default async function CartPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-      <h1 className="font-display text-4xl font-semibold text-wine sm:text-5xl">Your cart</h1>
+      <h1 className="font-display text-3xl font-semibold text-wine sm:text-5xl">Корзина</h1>
       <div className="mt-8 grid gap-8 md:grid-cols-[1.2fr_1fr] [&>*]:min-w-0">
         <div className="card p-5">
           <div className="rounded-2xl bg-cream px-[10%] pb-2 pt-[8%]">
             <BookMockup book={data} tilt="flat" soft={data.selection.format === "softcover"} />
           </div>
           <p className="mt-4 font-display text-xl font-semibold text-plum">
-            A book for {data.characters[1].name}, from {data.characters[0].name}
+            Для: {data.characters[1].name} · от: {data.characters[0].name}
           </p>
-          <p className="text-sm text-muted">{data.pages.length} pages · 8.5 × 5.5 in</p>
+          <p className="text-sm text-muted">{count(data.pages.length, ["страница", "страницы", "страниц"])} · 22 × 14 см</p>
           <div className="mt-4 flex flex-wrap gap-3 text-sm">
-            <Link href={stepHref(id, "preview")} className="font-semibold text-plum underline">Preview again</Link>
-            <Link href={stepHref(id, "edit")} className="font-semibold text-plum underline">Edit pages</Link>
-            <Link href={stepHref(id, "options")} className="font-semibold text-plum underline">Change format</Link>
+            <Link href={stepHref(id, "preview")} className="font-semibold text-plum underline">Посмотреть ещё раз</Link>
+            <Link href={stepHref(id, "edit")} className="font-semibold text-plum underline">Изменить страницы</Link>
+            <Link href={stepHref(id, "options")} className="font-semibold text-plum underline">Сменить формат</Link>
           </div>
         </div>
 
         <div className="card h-fit p-5">
-          <h2 className="font-display text-xl font-semibold text-plum">Order summary</h2>
+          <h2 className="font-display text-xl font-semibold text-plum">Ваш заказ</h2>
           <ul className="mt-4 divide-y divide-line text-sm">
             {items.map((i) => (
               <li key={i.id} className="flex justify-between py-2.5">
@@ -50,24 +51,24 @@ export default async function CartPage({ params }: { params: Promise<{ id: strin
           </ul>
           {promo && (
             <div className="flex justify-between py-2.5 text-sm font-semibold text-sage">
-              <span>Discount ({promo.code})</span>
-              <span>−{money(t.discount)}</span>
+              <span>Скидка ({promo.code})</span>
+              <span>{money(t.discount)}</span>
             </div>
           )}
           <div className="mt-2 flex justify-between border-t border-line pt-3 text-lg font-bold">
-            <span>Total before shipping</span>
+            <span>Итого без доставки</span>
             <span>{money(t.total)}</span>
           </div>
           <div className="mt-4">
             <PromoForm bookId={id} applied={promo ? { code: promo.code, label: promo.label } : null} />
           </div>
           <p className="mt-3 text-sm text-muted">
-            Shipping at checkout: {SHIPPING.map((s) => `${s.label.replace(" shipping", "")} ${money(s.cents)} (${s.minDays}–${s.maxDays} business days)`).join(" · ")}.
+            Доставка выбирается при оплате: {SHIPPING.map((s) => `${s.label.toLowerCase()} ${money(s.cents)} (от ${s.minDays} до ${s.maxDays} раб. дней)`).join(" · ")}.
           </p>
           <div className="mt-5">
             <CheckoutButton bookId={id} />
           </div>
-          <p className="mt-3 text-center text-xs text-muted">Payments are handled by Stripe. We never see your card details.</p>
+          <p className="mt-3 text-center text-xs text-muted">Оплату принимает Stripe. Данные вашей карты мы не видим.</p>
         </div>
       </div>
     </div>

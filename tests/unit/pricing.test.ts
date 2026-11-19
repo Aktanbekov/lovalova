@@ -7,11 +7,13 @@ describe("pricing", () => {
   });
   it("adds every upgrade", () => {
     const sel = { format: "hardcover", matte: true, digital: true, giftbox: true } as const;
-    expect(subtotal(sel)).toBe(6400 + 500 + 900 + 1500);
+    expect(subtotal(sel)).toBe(FORMATS.hardcover.cents + UPGRADES.matte.cents + UPGRADES.digital.cents + UPGRADES.giftbox.cents);
     expect(lineItems(sel).map((i) => i.id)).toEqual(["hardcover", "matte", "digital", "giftbox"]);
   });
   it("formats money", () => {
-    expect(money(6400)).toBe("$64.00");
-    expect(money(UPGRADES.matte.cents)).toBe("$5.00");
+    // Whole som, Russian digit grouping (no-break spaces), no kopecks.
+    expect(money(549000)).toBe("5\u00a0490\u00a0сом");
+    expect(money(39000)).toBe("390\u00a0сом");
+    expect(money(12345)).toBe("123,45\u00a0сом");
   });
 });

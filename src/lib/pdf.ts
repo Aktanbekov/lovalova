@@ -5,7 +5,10 @@ import { printToken } from "./printToken";
 import { siteUrl } from "./stripe";
 import { setOrderPdf } from "./store";
 
-export const PDF_DIR = path.resolve(/* turbopackIgnore: true */ process.cwd(), "storage/pdfs");
+// On Vercel only /tmp is writable (and not durable); see README → Deploy.
+export const PDF_DIR = process.env.VERCEL
+  ? "/tmp/lovalova/pdfs"
+  : path.resolve(/* turbopackIgnore: true */ process.cwd(), "storage/pdfs");
 
 export function pdfPathFor(orderId: string) {
   return path.join(PDF_DIR, `${orderId}.pdf`);

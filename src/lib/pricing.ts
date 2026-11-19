@@ -1,26 +1,27 @@
-// Every price lives here. Amounts are US cents. The server computes totals;
-// Stripe only charges what we send it.
+// Every price lives here. Amounts are in tyiyn (1/100 of a Kyrgyz som), the
+// minor unit Stripe expects for KGS. The server computes totals; Stripe only
+// charges what we send it. Prices are starting values to tune.
 
 import type { Selection } from "@/lib/book/schema";
 
-export const CURRENCY = "usd";
+export const CURRENCY = "kgs";
 
 export const FORMATS = {
-  softcover: { label: "Softcover", cents: 4900, blurb: "Flexible glossy cover, lay-flat friendly." },
-  hardcover: { label: "Hardcover", cents: 6400, blurb: "Sturdy case-bound cover. Made to last for years." },
+  softcover: { label: "Мягкая обложка", cents: 399000, blurb: "Гибкая глянцевая обложка, лёгкая книга." },
+  hardcover: { label: "Твёрдая обложка", cents: 549000, blurb: "Плотный переплёт, прослужит годы." },
 } as const;
 
 export const UPGRADES = {
-  matte: { label: "Matte finish", cents: 500, blurb: "Soft-touch matte pages instead of gloss." },
-  digital: { label: "Digital copy", cents: 900, blurb: "A PDF of the book to keep and share." },
-  giftbox: { label: "Gift box", cents: 1500, blurb: "Ready-to-give keepsake box with ribbon." },
+  matte: { label: "Матовые страницы", cents: 39000, blurb: "Бархатистая матовая бумага вместо глянца." },
+  digital: { label: "Электронная копия", cents: 79000, blurb: "PDF книги, чтобы сохранить и отправить." },
+  giftbox: { label: "Подарочная коробка", cents: 129000, blurb: "Коробка с лентой, сразу можно дарить." },
 } as const;
 
 export type UpgradeId = keyof typeof UPGRADES;
 
 export const SHIPPING = [
-  { id: "standard", label: "Standard shipping", cents: 795, minDays: 5, maxDays: 8 },
-  { id: "express", label: "Express shipping", cents: 1495, minDays: 2, maxDays: 4 },
+  { id: "standard", label: "Обычная доставка", cents: 59000, minDays: 5, maxDays: 8 },
+  { id: "express", label: "Срочная доставка", cents: 119000, minDays: 2, maxDays: 4 },
 ] as const;
 
 export interface LineItem {
@@ -30,7 +31,7 @@ export interface LineItem {
 }
 
 export function lineItems(sel: Selection): LineItem[] {
-  const items: LineItem[] = [{ id: sel.format, label: `Personalized book — ${FORMATS[sel.format].label}`, cents: FORMATS[sel.format].cents }];
+  const items: LineItem[] = [{ id: sel.format, label: `Именная книга, ${FORMATS[sel.format].label.toLowerCase()}`, cents: FORMATS[sel.format].cents }];
   for (const id of Object.keys(UPGRADES) as UpgradeId[]) {
     if (sel[id]) items.push({ id, label: UPGRADES[id].label, cents: UPGRADES[id].cents });
   }
@@ -41,8 +42,11 @@ export function subtotal(sel: Selection): number {
   return lineItems(sel).reduce((sum, i) => sum + i.cents, 0);
 }
 
+/** "3 990 сом" — whole som, thin no-break space between thousands. */
 export function money(cents: number): string {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
+  const som = cents / 100;
+  const digits = Number.isInteger(som) ? 0 : 2;
+  return `${new Intl.NumberFormat("ru-RU", { minimumFractionDigits: digits, maximumFractionDigits: 2 }).format(som)}\u00a0сом`;
 }
 
 export interface Totals {

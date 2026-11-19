@@ -40,17 +40,17 @@ export function CheckoutButton({ bookId }: { bookId: string }) {
     <div>
       {!simulate ? (
         <button type="button" className="btn btn-primary w-full !py-3.5 text-base" onClick={checkout} disabled={busy}>
-          {busy ? "Opening secure checkout…" : "Checkout securely"}
+          {busy ? "Открываем оплату…" : "Перейти к оплате"}
         </button>
       ) : (
-        <div className="rounded-2xl border-2 border-dashed border-gold bg-gold/10 p-4 text-sm">
-          <p className="font-semibold text-plum">Stripe isn&apos;t configured yet (development mode)</p>
+        <div className="rounded-xl border-2 border-dashed border-gold bg-gold/10 p-4 text-sm">
+          <p className="font-semibold text-plum">Stripe ещё не подключён (режим разработки)</p>
           <p className="mt-1 text-muted">
-            Add your Stripe <strong>test</strong> keys to <code>.env.local</code> to use real test checkout. For now you can simulate a paid order to
-            test fulfilment and the PDF.
+            Добавьте <strong>тестовые</strong> ключи Stripe в <code>.env.local</code>, чтобы проверить настоящую оплату. А пока можно
+            изобразить оплаченный заказ и проверить PDF.
           </p>
           <button type="button" className="btn btn-primary mt-3 w-full" onClick={fakePay} disabled={busy}>
-            {busy ? "Placing test order…" : "Simulate test payment"}
+            {busy ? "Оформляем тестовый заказ…" : "Тестовая оплата"}
           </button>
         </div>
       )}

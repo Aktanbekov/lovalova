@@ -37,63 +37,63 @@ export const OUTFIT_COLORS = [
 ] as const;
 
 export const FACE_SHAPES = [
-  { id: "round", label: "Round" },
-  { id: "oval", label: "Oval" },
-  { id: "soft", label: "Soft square" },
+  { id: "round", label: "Круглое" },
+  { id: "oval", label: "Овальное" },
+  { id: "soft", label: "Квадратное" },
 ] as const;
 
 export const EYE_STYLES = [
-  { id: "dot", label: "Dots" },
-  { id: "shine", label: "Shiny" },
-  { id: "happy", label: "Smiley" },
-  { id: "lashes", label: "Lashes" },
-  { id: "sleepy", label: "Dreamy" },
-  { id: "wide", label: "Wide" },
+  { id: "dot", label: "Точки" },
+  { id: "shine", label: "Блестящие" },
+  { id: "happy", label: "Улыбчивые" },
+  { id: "lashes", label: "С ресницами" },
+  { id: "sleepy", label: "Мечтательные" },
+  { id: "wide", label: "Широкие" },
 ] as const;
 
 export const BROW_STYLES = [
-  { id: "soft", label: "Soft" },
-  { id: "bold", label: "Bold" },
-  { id: "arched", label: "Arched" },
+  { id: "soft", label: "Мягкие" },
+  { id: "bold", label: "Густые" },
+  { id: "arched", label: "Дугой" },
 ] as const;
 
 export const HAIR_STYLES = [
-  { id: "crop", label: "Short crop" },
-  { id: "buzz", label: "Buzz" },
-  { id: "sidepart", label: "Side part" },
-  { id: "curly", label: "Curly" },
-  { id: "long", label: "Long" },
-  { id: "wavy", label: "Long wavy" },
-  { id: "bob", label: "Bob" },
-  { id: "ponytail", label: "Ponytail" },
-  { id: "bun", label: "Bun" },
-  { id: "pixie", label: "Pixie" },
-  { id: "topknot", label: "Top knot" },
-  { id: "bald", label: "Bald" },
+  { id: "crop", label: "Короткая" },
+  { id: "buzz", label: "Под машинку" },
+  { id: "sidepart", label: "С пробором" },
+  { id: "curly", label: "Кудри" },
+  { id: "long", label: "Длинные" },
+  { id: "wavy", label: "Длинные волнистые" },
+  { id: "bob", label: "Каре" },
+  { id: "ponytail", label: "Хвост" },
+  { id: "bun", label: "Пучок" },
+  { id: "pixie", label: "Пикси" },
+  { id: "topknot", label: "Пучок сверху" },
+  { id: "bald", label: "Без волос" },
 ] as const;
 
 export const FACIAL_HAIR = [
-  { id: "none", label: "None" },
-  { id: "stubble", label: "Stubble" },
-  { id: "mustache", label: "Mustache" },
-  { id: "beard", label: "Beard" },
+  { id: "none", label: "Нет" },
+  { id: "stubble", label: "Щетина" },
+  { id: "mustache", label: "Усы" },
+  { id: "beard", label: "Борода" },
 ] as const;
 
 export const GLASSES = [
-  { id: "none", label: "None" },
-  { id: "round", label: "Round" },
-  { id: "square", label: "Square" },
+  { id: "none", label: "Нет" },
+  { id: "round", label: "Круглые" },
+  { id: "square", label: "Квадратные" },
 ] as const;
 
 export const OUTFITS = [
-  { id: "tee", label: "T-shirt" },
-  { id: "stripes", label: "Stripy tee" },
-  { id: "sweater", label: "Sweater" },
-  { id: "hoodie", label: "Hoodie" },
-  { id: "shirt", label: "Shirt" },
-  { id: "blazer", label: "Blazer" },
-  { id: "dress", label: "Dress" },
-  { id: "overalls", label: "Overalls" },
+  { id: "tee", label: "Футболка" },
+  { id: "stripes", label: "В полоску" },
+  { id: "sweater", label: "Свитер" },
+  { id: "hoodie", label: "Худи" },
+  { id: "shirt", label: "Рубашка" },
+  { id: "blazer", label: "Пиджак" },
+  { id: "dress", label: "Платье" },
+  { id: "overalls", label: "Комбинезон" },
 ] as const;
 
 type Ids<T extends readonly { id: string }[]> = T[number]["id"];
@@ -160,16 +160,16 @@ export const DEFAULT_TRAITS_B: Traits = {
 
 /** Trait categories in the order the builder shows them. */
 export const TRAIT_GROUPS = [
-  { key: "skin", label: "Skin", kind: "swatch", options: SKIN_TONES },
-  { key: "hair", label: "Hair", kind: "shape", options: HAIR_STYLES },
-  { key: "hairColor", label: "Hair colour", kind: "swatch", options: HAIR_COLORS },
-  { key: "face", label: "Face", kind: "shape", options: FACE_SHAPES },
-  { key: "eyes", label: "Eyes", kind: "shape", options: EYE_STYLES },
-  { key: "brows", label: "Brows", kind: "shape", options: BROW_STYLES },
-  { key: "facialHair", label: "Facial hair", kind: "shape", options: FACIAL_HAIR },
-  { key: "glasses", label: "Glasses", kind: "shape", options: GLASSES },
-  { key: "outfit", label: "Outfit", kind: "shape", options: OUTFITS },
-  { key: "outfitColor", label: "Outfit colour", kind: "swatch", options: OUTFIT_COLORS },
+  { key: "skin", label: "Кожа", kind: "swatch", options: SKIN_TONES },
+  { key: "hair", label: "Причёска", kind: "shape", options: HAIR_STYLES },
+  { key: "hairColor", label: "Цвет волос", kind: "swatch", options: HAIR_COLORS },
+  { key: "face", label: "Лицо", kind: "shape", options: FACE_SHAPES },
+  { key: "eyes", label: "Глаза", kind: "shape", options: EYE_STYLES },
+  { key: "brows", label: "Брови", kind: "shape", options: BROW_STYLES },
+  { key: "facialHair", label: "Борода", kind: "shape", options: FACIAL_HAIR },
+  { key: "glasses", label: "Очки", kind: "shape", options: GLASSES },
+  { key: "outfit", label: "Одежда", kind: "shape", options: OUTFITS },
+  { key: "outfitColor", label: "Цвет одежды", kind: "swatch", options: OUTFIT_COLORS },
 ] as const;
 
 export function randomTraits(rand: () => number = Math.random): Traits {
@@ -189,3 +189,12 @@ export function randomTraits(rand: () => number = Math.random): Traits {
     blush: true,
   };
 }
+
+/** Russian names for colour swatches (screen readers and tooltips). Keyed by stored id. */
+export const SWATCH_NAMES: Record<string, string> = {
+  porcelain: "Фарфоровый", light: "Светлый", warm: "Тёплый", tan: "Загорелый", honey: "Медовый",
+  bronze: "Бронзовый", brown: "Коричневый", deep: "Тёмный", black: "Чёрный", darkbrown: "Тёмно-каштановый",
+  chestnut: "Каштановый", lightbrown: "Светло-каштановый", blonde: "Блонд", auburn: "Рыжий", gray: "Седой",
+  white: "Белый", rose: "Розовый", plum: "Сливовый", denim: "Джинсовый", sage: "Шалфейный",
+  mustard: "Горчичный", charcoal: "Графитовый", cream: "Кремовый", rust: "Терракотовый",
+};

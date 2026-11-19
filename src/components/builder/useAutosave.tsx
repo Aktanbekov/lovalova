@@ -43,7 +43,7 @@ export function useAutosave(bookId: string, patch: BookPatch, delay = 600) {
 }
 
 export function SaveIndicator({ status }: { status: SaveStatus }) {
-  const text = status === "saving" ? "Saving…" : status === "saved" ? "Saved" : status === "error" ? "Not saved" : "";
+  const text = status === "saving" ? "Сохраняем…" : status === "saved" ? "Сохранено" : status === "error" ? "Не сохранено" : "";
   return (
     <span aria-live="polite" className={`text-xs ${status === "error" ? "text-rose-dark" : "text-muted"}`}>
       {text}

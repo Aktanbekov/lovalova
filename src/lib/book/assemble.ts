@@ -1,3 +1,4 @@
+import { count } from "@/lib/ru";
 import { DEFAULT_EXTRAS, getTemplate, TEMPLATES } from "@/content/pages";
 import { RELATIONSHIPS } from "./catalog";
 import type { Answers, BookData, PageRef } from "./schema";
@@ -48,8 +49,8 @@ export function availableTemplates(pages: PageRef[]) {
 export function yearsText(since: number | null, now = new Date()): string {
   if (since === null) return "";
   const years = now.getFullYear() - since;
-  if (years <= 0) return "less than a year";
-  return years === 1 ? "1 year" : `${years} years`;
+  if (years <= 0) return "меньше года";
+  return count(years, ["год", "года", "лет"]);
 }
 
 export interface TextContext {
@@ -62,9 +63,9 @@ export interface TextContext {
 
 export function textContext(book: Pick<BookData, "characters" | "relationship" | "answers">, now = new Date()): TextContext {
   return {
-    A: book.characters[0].name.trim() || "Me",
-    B: book.characters[1].name.trim() || "You",
-    rel: RELATIONSHIPS.find((r) => r.id === book.relationship)?.word ?? "partner",
+    A: book.characters[0].name.trim() || "Я",
+    B: book.characters[1].name.trim() || "Ты",
+    rel: RELATIONSHIPS.find((r) => r.id === book.relationship)?.word ?? "моей половинке",
     since: book.answers.since === null ? "" : String(book.answers.since),
     years: yearsText(book.answers.since, now),
   };

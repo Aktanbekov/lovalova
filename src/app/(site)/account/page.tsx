@@ -6,14 +6,15 @@ import { stepHref } from "@/lib/book/steps";
 import { readOwner } from "@/lib/owner";
 import { FORMATS, money } from "@/lib/pricing";
 import { listBooks, listOrders, type BookRow } from "@/lib/store";
+import { count } from "@/lib/ru";
 
-export const metadata = { title: "My books & orders" };
+export const metadata = { title: "Мои книги и заказы" };
 
 function nextStep(b: BookRow) {
-  if (b.status === "ordered") return { label: "Ordered", href: null };
-  if (b.data.previewed) return { label: "Ready to order", href: `/cart/${b.id}` };
-  if (b.data.assembled) return { label: "Ready to preview", href: stepHref(b.id, "edit") };
-  return { label: "In progress", href: stepHref(b.id, "characters") };
+  if (b.status === "ordered") return { label: "Заказана", href: null };
+  if (b.data.previewed) return { label: "Готова к заказу", href: `/cart/${b.id}` };
+  if (b.data.assembled) return { label: "Можно смотреть", href: stepHref(b.id, "edit") };
+  return { label: "В работе", href: stepHref(b.id, "characters") };
 }
 
 export default async function AccountPage() {
@@ -25,22 +26,22 @@ export default async function AccountPage() {
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl font-semibold text-wine sm:text-5xl">{user ? `Hi${user.name ? `, ${user.name}` : ""}!` : "My books"}</h1>
-          <p className="mt-2 text-lg text-muted">{user ? `Signed in as ${user.email}` : "These books are saved in this browser."}</p>
+          <h1 className="font-display text-3xl font-semibold text-wine sm:text-5xl">{user ? `Привет${user.name ? `, ${user.name}` : ""}!` : "Мои книги"}</h1>
+          <p className="mt-2 text-lg text-muted">{user ? `Вы вошли как ${user.email}` : "Эти книги сохранены в этом браузере."}</p>
         </div>
-        <CreateButton className="btn btn-primary" label="Start a new book" />
+        <CreateButton className="btn btn-primary w-full sm:w-auto" label="Создать новую книгу" />
       </div>
 
       {!user && (
-        <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-3xl bg-blush p-6 sm:flex-row sm:items-center">
-          <p className="text-lg"><strong>Save your books to an account</strong> so you can open them on any device and find your orders later.</p>
-          <Link href="/account/sign-in?mode=signup&next=/account" className="btn btn-primary shrink-0">Create account</Link>
+        <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-xl bg-blush p-5 sm:flex-row sm:items-center">
+          <p className="sm:text-lg"><strong>Сохраните книги в аккаунте</strong>, чтобы открывать их с любого телефона и всегда находить заказы.</p>
+          <Link href="/account/sign-in?mode=signup&next=/account" className="btn btn-primary w-full shrink-0 sm:w-auto">Создать аккаунт</Link>
         </div>
       )}
 
-      <h2 className="mt-12 font-display text-3xl font-semibold text-ink">Books</h2>
+      <h2 className="mt-12 font-display text-3xl font-semibold text-ink">Книги</h2>
       {books.length === 0 ? (
-        <p className="mt-3 text-muted">No books yet. Start one — it only takes about ten minutes.</p>
+        <p className="mt-3 text-muted">Книг пока нет. Начните, это около десяти минут.</p>
       ) : (
         <ul className="mt-6 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
           {books.map((b) => {
@@ -48,14 +49,14 @@ export default async function AccountPage() {
             const [A, B] = b.data.characters;
             return (
               <li key={b.id}>
-                <div className="rounded-3xl bg-cream px-[9%] pb-2 pt-[9%]">
+                <div className="rounded-xl bg-cream px-[9%] pb-2 pt-[9%]">
                   <BookMockup book={b.data} tilt="flat" />
                 </div>
-                <p className="mt-3 text-lg font-bold text-ink">{B.name && A.name ? `For ${B.name}, from ${A.name}` : "Untitled book"}</p>
-                <p className="text-sm text-muted">{s.label} · {b.data.pages.length || "—"} pages</p>
+                <p className="mt-3 text-lg font-bold text-ink">{B.name && A.name ? `Для: ${B.name} · от: ${A.name}` : "Книга без названия"}</p>
+                <p className="text-sm text-muted">{s.label} · {b.data.pages.length ? count(b.data.pages.length, ["страница", "страницы", "страниц"]) : "страниц пока нет"}</p>
                 {s.href && (
                   <Link href={s.href} className="mt-2 inline-block font-bold text-brand underline underline-offset-4">
-                    {b.data.previewed ? "Go to checkout" : "Continue"} →
+                    {b.data.previewed ? "К оплате" : "Продолжить"} →
                   </Link>
                 )}
               </li>
@@ -64,20 +65,20 @@ export default async function AccountPage() {
         </ul>
       )}
 
-      <h2 className="mt-14 font-display text-3xl font-semibold text-ink">Orders</h2>
+      <h2 className="mt-14 font-display text-3xl font-semibold text-ink">Заказы</h2>
       {orders.length === 0 ? (
-        <p className="mt-3 text-muted">No orders yet.</p>
+        <p className="mt-3 text-muted">Заказов пока нет.</p>
       ) : (
-        <ul className="mt-6 divide-y divide-line rounded-3xl bg-white ring-1 ring-line">
+        <ul className="mt-6 divide-y divide-line rounded-xl bg-white ring-1 ring-line">
           {orders.map((o) => (
             <li key={o.id} className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
               <span>
-                <span className="block font-bold">For {o.book.characters[1].name} · {FORMATS[o.selection.format].label}</span>
-                <span className="text-sm text-muted">Order {o.id} · {o.createdAt.slice(0, 10)}</span>
+                <span className="block font-bold">Для: {o.book.characters[1].name} · {FORMATS[o.selection.format].label}</span>
+                <span className="text-sm text-muted">Заказ {o.id} · {o.createdAt.slice(0, 10)}</span>
               </span>
               <span className="flex items-center gap-4">
                 <span className="font-bold">{money(o.amountCents)}</span>
-                <Link href={`/checkout/success?order=${o.id}`} className="font-bold text-brand underline underline-offset-4">View</Link>
+                <Link href={`/checkout/success?order=${o.id}`} className="font-bold text-brand underline underline-offset-4">Открыть</Link>
               </span>
             </li>
           ))}

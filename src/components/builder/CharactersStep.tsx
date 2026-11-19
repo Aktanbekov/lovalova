@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { AvatarSvg } from "@/components/avatar/Avatar";
 import { Couple } from "@/components/book/scenes";
-import { TRAIT_GROUPS, randomTraits, type Traits } from "@/lib/avatar/options";
+import { SWATCH_NAMES, TRAIT_GROUPS, randomTraits, type Traits } from "@/lib/avatar/options";
 import { LIMITS, type Character } from "@/lib/book/schema";
 import { stepHref } from "@/lib/book/steps";
 import { useAutosave } from "./useAutosave";
 import { StepFooter } from "./StepFooter";
 
-const WHO = ["You", "Your partner"] as const;
+const WHO = ["Вы", "Ваша половинка"] as const;
 
 export function CharactersStep({ bookId, initial }: { bookId: string; initial: [Character, Character] }) {
   const [chars, setChars] = useState<[Character, Character]>(initial);
@@ -33,18 +33,18 @@ export function CharactersStep({ bookId, initial }: { bookId: string; initial: [
     <>
       <div className="mx-auto grid max-w-6xl gap-8 px-4 pt-8 sm:px-6 lg:grid-cols-[1.1fr_1fr]">
         <section className="min-w-0">
-          <h1 className="font-display text-3xl font-semibold text-plum sm:text-4xl">Create the two of you</h1>
-          <p className="mt-2 text-muted">Design a cartoon version of yourself and your partner. They&apos;ll star on every page.</p>
+          <h1 className="font-display text-3xl font-semibold text-plum sm:text-4xl">Соберите вас двоих</h1>
+          <p className="mt-2 text-muted">Нарисуйте себя и свою половинку. Эти герои будут на каждой странице.</p>
 
           <div className="card mt-6 overflow-hidden">
-            <svg viewBox="230 190 390 330" className="block max-h-[34vh] w-full bg-blush/60 lg:max-h-none" role="img" aria-label="Preview of both characters">
+            <svg viewBox="230 190 390 330" className="block max-h-[34vh] w-full bg-blush/60 lg:max-h-none" role="img" aria-label="Оба героя">
               <Couple A={chars[0].traits} B={chars[1].traits} poses={["reachRight", "reachLeft"]} />
             </svg>
             <div className="grid grid-cols-2 border-t border-line text-center text-sm">
               {chars.map((ch, i) => (
                 <div key={i} className={`py-2 ${i === 0 ? "border-r border-line" : ""}`}>
                   <span className="text-muted">{WHO[i]}: </span>
-                  <span className="font-semibold text-plum">{ch.name.trim() || "—"}</span>
+                  <span className="font-semibold text-plum">{ch.name.trim() || "…"}</span>
                 </div>
               ))}
             </div>
@@ -52,14 +52,14 @@ export function CharactersStep({ bookId, initial }: { bookId: string; initial: [
         </section>
 
         <section className="min-w-0 lg:pt-2">
-          <div role="tablist" aria-label="Choose character" className="grid grid-cols-2 gap-2 rounded-full bg-paper p-1 ring-1 ring-line">
+          <div role="tablist" aria-label="Кого рисуем" className="grid grid-cols-2 gap-2 rounded-lg bg-paper p-1 ring-1 ring-line">
             {WHO.map((label, i) => (
               <button
                 key={label}
                 role="tab"
                 aria-selected={who === i}
                 onClick={() => setWho(i as 0 | 1)}
-                className={`rounded-full px-4 py-2.5 text-sm font-semibold transition ${who === i ? "bg-plum text-white" : "text-muted hover:text-plum"}`}
+                className={`rounded-md px-4 py-2.5 text-sm font-semibold transition ${who === i ? "bg-plum text-white" : "text-muted hover:text-plum"}`}
               >
                 {label}
               </button>
@@ -68,21 +68,21 @@ export function CharactersStep({ bookId, initial }: { bookId: string; initial: [
 
           <div className="mt-5 flex items-end gap-3">
             <label className="flex-1">
-              <span className="text-sm font-medium">{who === 0 ? "Your name" : "Their name"}</span>
+              <span className="text-sm font-medium">{who === 0 ? "Ваше имя" : "Имя половинки"}</span>
               <input
                 className="field mt-1"
                 value={c.name}
                 maxLength={LIMITS.name}
-                placeholder={who === 0 ? "e.g. Alex" : "e.g. Sam"}
+                placeholder={who === 0 ? "Например, Айбек" : "Например, Айпери"}
                 onChange={(e) => update({ name: e.target.value })}
               />
             </label>
             <button type="button" className="btn btn-secondary !px-4 !py-[0.7rem] text-sm" onClick={() => update({ traits: randomTraits() })}>
-              Shuffle look
+              Случайно
             </button>
           </div>
 
-          <div className="mt-6 flex gap-2 overflow-x-auto pb-2" role="tablist" aria-label="Appearance">
+          <div className="mt-6 flex gap-2 overflow-x-auto pb-2" role="tablist" aria-label="Внешность">
             {TRAIT_GROUPS.map((g) => (
               <button
                 key={g.key}
@@ -105,7 +105,8 @@ export function CharactersStep({ bookId, initial }: { bookId: string; initial: [
                     <button
                       key={o.id}
                       type="button"
-                      aria-label={o.id}
+                      aria-label={SWATCH_NAMES[o.id] ?? o.id}
+                      title={SWATCH_NAMES[o.id] ?? o.id}
                       aria-pressed={selected}
                       onClick={() => setTrait(active.key as keyof Traits, o.id as never)}
                       className={`h-11 w-11 rounded-full border-2 transition ${selected ? "scale-110 border-plum ring-4 ring-plum/15" : "border-white shadow ring-1 ring-line"}`}
@@ -138,7 +139,7 @@ export function CharactersStep({ bookId, initial }: { bookId: string; initial: [
             {active.key === "skin" && (
               <label className="mt-4 flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={c.traits.blush} onChange={(e) => setTrait("blush", e.target.checked)} className="h-4 w-4 accent-plum" />
-                Rosy cheeks
+                Румянец
               </label>
             )}
           </div>
@@ -148,7 +149,7 @@ export function CharactersStep({ bookId, initial }: { bookId: string; initial: [
       <StepFooter
         nextHref={stepHref(bookId, "occasion")}
         canContinue={Boolean(bothNamed)}
-        hint="Add both names to continue"
+        hint="Впишите оба имени"
         status={status}
         error={error}
         beforeNext={saveNow}

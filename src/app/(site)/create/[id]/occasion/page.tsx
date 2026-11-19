@@ -1,7 +1,7 @@
 import { OccasionStep } from "@/components/builder/OccasionStep";
 import { loadOwnedBook } from "@/lib/loadBook";
 
-export const metadata = { title: "Occasion" };
+export const metadata = { title: "Повод" };
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

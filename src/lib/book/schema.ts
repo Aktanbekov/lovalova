@@ -98,7 +98,7 @@ export function defaultBook(): BookData {
     ],
     occasion: "anniversary",
     relationship: "partner",
-    cover: { id: "hearts", title: "Why I Love You" },
+    cover: { id: "hearts", title: "Почему я тебя люблю" },
     answers: { since: null, features: [], qualities: [], activities: [], dedication: "" },
     pages: [],
     assembled: false,

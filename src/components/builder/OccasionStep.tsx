@@ -23,25 +23,25 @@ export function OccasionStep({
   return (
     <>
       <div className="mx-auto max-w-3xl px-4 pt-8 sm:px-6">
-        <h1 className="font-display text-3xl font-semibold text-plum sm:text-4xl">What&apos;s the occasion?</h1>
-        <p className="mt-2 text-muted">We&apos;ll add a special page for it near the end of the book.</p>
+        <h1 className="font-display text-3xl font-semibold text-plum sm:text-4xl">Какой повод?</h1>
+        <p className="mt-2 text-muted">Для него в конце книги будет особая страница.</p>
 
-        <div role="radiogroup" aria-label="Occasion" className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div role="radiogroup" aria-label="Повод" className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {OCCASIONS.map((o) => (
             <button
               key={o.id}
               role="radio"
               aria-checked={occasion === o.id}
               onClick={() => setOccasion(o.id)}
-              className={`rounded-2xl border-2 bg-paper px-3 py-5 text-center font-semibold transition ${occasion === o.id ? "border-plum bg-blush/50 text-plum" : "border-line hover:border-plum/50"}`}
+              className={`rounded-xl border-2 bg-paper px-3 py-5 text-center font-semibold transition ${occasion === o.id ? "border-plum bg-blush/50 text-plum" : "border-line hover:border-plum/50"}`}
             >
               {o.label}
             </button>
           ))}
         </div>
 
-        <h2 className="mt-10 font-display text-2xl font-semibold text-plum">{partnerName || "Your partner"} is your…</h2>
-        <div role="radiogroup" aria-label="Relationship" className="mt-4 flex flex-wrap gap-2">
+        <h2 className="mt-10 font-display text-2xl font-semibold text-plum">Кто для вас {partnerName || "ваша половинка"}?</h2>
+        <div role="radiogroup" aria-label="Кем приходится" className="mt-4 flex flex-wrap gap-2">
           {RELATIONSHIPS.map((r) => (
             <button key={r.id} role="radio" aria-checked={relationship === r.id} onClick={() => setRelationship(r.id)} className="chip">
               {r.label}

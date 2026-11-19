@@ -34,7 +34,7 @@ export function BookPage({ book, page, className }: { book: BookView; page: Page
         <Scene id="letter" A={A.traits} B={B.traits} poses={poses} />
         <div className="absolute inset-[14%] flex items-center justify-center text-center">
           <p className="font-display italic text-ink whitespace-pre-line" style={{ fontSize: "3.4cqw", lineHeight: 1.35 }}>
-            {text || "Your dedication will appear here."}
+            {text || "Здесь будет ваше посвящение."}
           </p>
         </div>
       </PageFrame>
@@ -78,10 +78,10 @@ export function CoverPage({ book, coverId, className }: { book: BookView; coverI
       <Scene id={scene} A={A.traits} B={B.traits} poses={poses} />
       <div className={`absolute left-[6%] right-[6%] top-[5%] flex h-[32%] flex-col items-center justify-center text-center ${dark ? "text-cream" : "text-plum"}`}>
         <h3 className="font-display font-semibold" style={{ fontSize: "6.2cqw", lineHeight: 1.05 }}>
-          {fillText(book.cover.title || "Why I Love You", ctx)}
+          {fillText(book.cover.title || "Почему я тебя люблю", ctx)}
         </h3>
         <p className="mt-[1.2cqw] font-sans uppercase tracking-[0.18em]" style={{ fontSize: "1.7cqw" }}>
-          For {ctx.B} · From {ctx.A}
+          для: {ctx.B} · от: {ctx.A}
         </p>
       </div>
     </PageFrame>

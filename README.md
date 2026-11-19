@@ -65,15 +65,29 @@ npm run lint
 | Occasion / recipient shop pages | `src/content/collections.ts`, `src/components/shop/CollectionPage.tsx` |
 | Sample couples for cover examples | `src/lib/demo.ts` |
 | Discount codes (every advertised code lives here and works) | `src/lib/promos.ts` |
-| Accounts and sessions | `src/lib/auth.ts`, `src/lib/password.ts` |
+| Accounts and sessions | `src/lib/auth.ts`, `src/lib/password.ts`, Google: `src/lib/google.ts` |
 
 PDFs are written to `storage/pdfs/<orderId>.pdf` (8.5 × 5.5 in, cover + pages).
 
 Books belong to an "owner" id. Guests get one in an anonymous cookie (`ll_owner`); an account has its own. Signing up adopts the guest's books, and signing in moves any guest books in that browser into the account. Every action and route checks the owner before reading or changing a book or order. Each order stores a snapshot of the book, so later edits never change a paid order.
 
-Clicking "Create your book" as a guest offers to create an account or sign in first, or to carry on as a guest.
+Clicking «Создать книгу» as a guest offers to sign in with Google, create an account or sign in by e-mail, or to carry on as a guest.
+
+**Google sign-in** (optional): in Google Cloud console create an OAuth client ID of type "Web application" with the authorized redirect URI `http://localhost:3000/api/auth/google/callback` (and your real domain's equivalent in production), then put `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env.local` and restart. It uses the authorization-code flow with PKCE and a one-time state cookie (`src/lib/google.ts`, `src/app/api/auth/google/*`). A Google account is matched by its Google id, else linked to a password account with the same verified e-mail, else created. Without the keys the button explains that Google sign-in isn't set up.
 
 Discount codes are entered in the cart and taken off the book and extras (not shipping). With Stripe configured, the code is sent to Checkout as a matching coupon (`lovalova_<CODE>`, created on first use). The email offer stores addresses in the `subscribers` table and shows the `WELCOME10` code; no emails are sent.
+
+## Deploy to Vercel
+
+1. Import `github.com/Aktanbekov/lovalova` in Vercel (framework: Next.js, defaults are fine; Node 24 comes from `engines` in `package.json`).
+2. Add the environment variables from `.env.example` in Project → Settings → Environment Variables:
+   - `NEXT_PUBLIC_SITE_URL` — your production URL, e.g. `https://lovalova.vercel.app` (if unset, the Vercel deployment URL is used)
+   - `PRINT_TOKEN_SECRET` — a long random string (`openssl rand -hex 32`)
+   - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — in Stripe, add a webhook endpoint `https://<your-domain>/api/stripe/webhook` for `checkout.session.completed` and `checkout.session.async_payment_succeeded`, and copy its signing secret
+   - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (optional) — add `https://<your-domain>/api/auth/google/callback` as an authorized redirect URI
+3. Deploy.
+
+**Limitations on Vercel today.** Storage is a SQLite file and PDFs are written to disk. Vercel functions only have a temporary `/tmp`, so on Vercel the app uses `/tmp/lovalova/` — it runs, but drafts, accounts and orders are per-instance and disappear on cold starts, and the PDF step (headless Chromium via `playwright-core`) can't launch there. Before taking real orders, move storage to a hosted database (e.g. Turso/libSQL, which keeps the SQLite schema, or Postgres), PDFs to object storage (e.g. Vercel Blob), and PDF rendering to a serverless Chromium build or a separate worker.
 
 ## Not built yet
 

@@ -22,12 +22,12 @@ export function PromoForm({ bookId, applied }: { bookId: string; applied: { code
 
   if (applied) {
     return (
-      <div className="flex items-center justify-between gap-3 rounded-xl bg-mint px-3 py-2.5 text-sm">
+      <div className="flex items-center justify-between gap-3 rounded-lg bg-mint px-3 py-2.5 text-sm">
         <span>
-          <strong className="tracking-wider">{applied.code}</strong> applied — {applied.label}
+          <strong className="tracking-wider">{applied.code}</strong> применён: {applied.label}
         </span>
         <button type="button" className="font-semibold text-wine underline" onClick={() => submit(null)} disabled={busy}>
-          Remove
+          Убрать
         </button>
       </div>
     );
@@ -41,12 +41,12 @@ export function PromoForm({ bookId, applied }: { bookId: string; applied: { code
       }}
     >
       <label htmlFor="promo" className="text-sm font-semibold">
-        Discount code
+        Промокод
       </label>
       <div className="mt-1 flex gap-2">
-        <input id="promo" value={code} onChange={(e) => setCode(e.target.value)} className="field min-w-0 flex-1 uppercase" placeholder="e.g. LOVE15" autoComplete="off" />
+        <input id="promo" value={code} onChange={(e) => setCode(e.target.value)} className="field min-w-0 flex-1 uppercase" placeholder="Например, LOVE15" autoComplete="off" />
         <button type="submit" className="btn btn-secondary shrink-0 !px-4" disabled={busy || !code.trim()}>
-          {busy ? "…" : "Apply"}
+          {busy ? "…" : "Применить"}
         </button>
       </div>
       {error && <p className="mt-1.5 text-sm font-medium text-rose-dark" role="alert">{error}</p>}

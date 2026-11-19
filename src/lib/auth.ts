@@ -70,6 +70,26 @@ export function adoptGuestBooks(user: User, guestOwner: string | null) {
   db.prepare("UPDATE orders SET owner = ? WHERE owner = ?").run(user.owner, guestOwner);
 }
 
+/**
+ * Sign in with Google: find the account by its Google id, else link a
+ * password account with the same verified e-mail, else create one (adopting
+ * this browser's guest books). Google-only accounts have no usable password.
+ */
+export function googleUser(profile: { sub: string; email: string; name: string | null }, guestOwner: string | null): User {
+  const bySub = db.prepare("SELECT * FROM users WHERE google_sub = ?").get(profile.sub) as RawUser | undefined;
+  if (bySub) return toUser(bySub);
+  const email = normalizeEmail(profile.email);
+  const byEmail = db.prepare("SELECT * FROM users WHERE email = ?").get(email) as RawUser | undefined;
+  if (byEmail) {
+    db.prepare("UPDATE users SET google_sub = ? WHERE id = ?").run(profile.sub, byEmail.id);
+    return toUser(byEmail);
+  }
+  const owner = guestOwner && !isAccountOwner(guestOwner) ? guestOwner : newId(18);
+  const id = `usr_${newId(9)}`;
+  db.prepare("INSERT INTO users (id, email, name, password_hash, owner, google_sub) VALUES (?, ?, ?, '!', ?, ?)").run(id, email, profile.name, owner, profile.sub);
+  return { id, email, name: profile.name, owner };
+}
+
 // ---------- sessions ----------
 
 const tokenHash = (token: string) => createHash("sha256").update(token).digest("hex");

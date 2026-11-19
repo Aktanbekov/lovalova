@@ -1,11 +1,11 @@
 export const STEPS = [
-  { slug: "characters", label: "Characters" },
-  { slug: "occasion", label: "Occasion" },
-  { slug: "cover", label: "Cover" },
-  { slug: "quiz", label: "Questions" },
-  { slug: "edit", label: "Pages" },
-  { slug: "preview", label: "Preview" },
-  { slug: "options", label: "Format" },
+  { slug: "characters", label: "Герои" },
+  { slug: "occasion", label: "Повод" },
+  { slug: "cover", label: "Обложка" },
+  { slug: "quiz", label: "Вопросы" },
+  { slug: "edit", label: "Страницы" },
+  { slug: "preview", label: "Просмотр" },
+  { slug: "options", label: "Формат" },
 ] as const;
 
 export type StepSlug = (typeof STEPS)[number]["slug"];

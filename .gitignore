@@ -46,3 +46,7 @@ next-env.d.ts
 /storage/
 /test-results/
 /playwright-report/
+
+# third-party agent skills (restore with `npx skills` from skills-lock.json)
+/.agents/
+/.claude/skills/

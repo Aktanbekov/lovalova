@@ -14,8 +14,8 @@ export function PreviewStep({ bookId, book, pages }: { bookId: string; book: Boo
   return (
     <>
       <div className="mx-auto max-w-4xl px-4 pt-8 sm:px-6">
-        <h1 className="font-display text-3xl font-semibold text-plum sm:text-4xl">Flip through your book</h1>
-        <p className="mt-2 text-muted">This is exactly how it will print. Use the arrows or your keyboard to turn pages.</p>
+        <h1 className="font-display text-3xl font-semibold text-plum sm:text-4xl">Пролистайте свою книгу</h1>
+        <p className="mt-2 text-muted">Именно так она будет напечатана. Листайте стрелками.</p>
         <div className="mt-6">
           <FlipBook book={book} pages={pages} />
         </div>
@@ -23,7 +23,7 @@ export function PreviewStep({ bookId, book, pages }: { bookId: string; book: Boo
       <StepFooter
         backHref={stepHref(bookId, "edit")}
         nextHref={stepHref(bookId, "options")}
-        nextLabel="Looks perfect — continue"
+        nextLabel="Всё отлично, дальше"
         beforeNext={async () => (await markPreviewedAction(bookId)).ok}
       />
     </>
@@ -37,32 +37,32 @@ export function OptionsStep({ bookId, initial }: { bookId: string; initial: Sele
   return (
     <>
       <div className="mx-auto max-w-3xl px-4 pt-8 sm:px-6">
-        <h1 className="font-display text-3xl font-semibold text-plum sm:text-4xl">Choose your format</h1>
-        <p className="mt-2 text-muted">One price for any length. Printed on demand and shipped to your door.</p>
+        <h1 className="font-display text-3xl font-semibold text-plum sm:text-4xl">Выберите формат</h1>
+        <p className="mt-2 text-muted">Одна цена за любую длину. Печатаем под заказ и доставляем до двери.</p>
 
-        <div role="radiogroup" aria-label="Format" className="mt-6 grid gap-3 sm:grid-cols-2">
+        <div role="radiogroup" aria-label="Формат" className="mt-6 grid gap-3 sm:grid-cols-2">
           {(Object.keys(FORMATS) as (keyof typeof FORMATS)[]).map((f) => (
             <button
               key={f}
               role="radio"
               aria-checked={sel.format === f}
               onClick={() => setSel({ ...sel, format: f })}
-              className={`rounded-2xl border-2 bg-paper p-5 text-left transition ${sel.format === f ? "border-plum bg-blush/40" : "border-line hover:border-plum/50"}`}
+              className={`rounded-xl border-2 bg-paper p-5 text-left transition ${sel.format === f ? "border-plum bg-blush/40" : "border-line hover:border-plum/50"}`}
             >
               <div className="flex items-baseline justify-between">
                 <span className="font-display text-xl font-semibold text-plum">{FORMATS[f].label}</span>
                 <span className="font-semibold">{money(FORMATS[f].cents)}</span>
               </div>
               <p className="mt-1 text-sm text-muted">{FORMATS[f].blurb}</p>
-              {f === "hardcover" && <span className="mt-3 inline-block rounded-full bg-gold/30 px-2.5 py-0.5 text-xs font-semibold text-plum">Our pick for gifts</span>}
+              {f === "hardcover" && <span className="mt-3 inline-block rounded-md bg-gold/30 px-2.5 py-0.5 text-xs font-semibold text-plum">Лучший выбор для подарка</span>}
             </button>
           ))}
         </div>
 
-        <h2 className="mt-10 font-display text-2xl font-semibold text-plum">Add a little extra</h2>
+        <h2 className="mt-10 font-display text-2xl font-semibold text-plum">Добавить к книге</h2>
         <div className="mt-4 flex flex-col gap-3">
           {(Object.keys(UPGRADES) as UpgradeId[]).map((u) => (
-            <label key={u} className={`flex cursor-pointer items-center gap-4 rounded-2xl border-2 bg-paper p-4 transition ${sel[u] ? "border-plum" : "border-line hover:border-plum/50"}`}>
+            <label key={u} className={`flex cursor-pointer items-center gap-4 rounded-xl border-2 bg-paper p-4 transition ${sel[u] ? "border-plum" : "border-line hover:border-plum/50"}`}>
               <input type="checkbox" className="h-5 w-5 accent-plum" checked={sel[u]} onChange={(e) => setSel({ ...sel, [u]: e.target.checked })} />
               <span className="flex-1">
                 <span className="block font-semibold">{UPGRADES[u].label}</span>
@@ -74,15 +74,15 @@ export function OptionsStep({ bookId, initial }: { bookId: string; initial: Sele
         </div>
 
         <div className="mt-8 flex items-baseline justify-between rounded-2xl bg-plum px-5 py-4 text-white">
-          <span>Book total</span>
+          <span>Итого за книгу</span>
           <span className="font-display text-2xl font-semibold">{money(subtotal(sel))}</span>
         </div>
-        <p className="mt-2 text-sm text-muted">Shipping is chosen at checkout.</p>
+        <p className="mt-2 text-sm text-muted">Доставку выберете при оплате.</p>
       </div>
       <StepFooter
         backHref={stepHref(bookId, "preview")}
         nextHref={`/cart/${bookId}`}
-        nextLabel="Go to cart"
+        nextLabel="В корзину"
         status={status}
         error={error}
         beforeNext={saveNow}

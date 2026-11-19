@@ -12,9 +12,9 @@ import { stepHref } from "@/lib/book/steps";
 type Multi = "features" | "qualities" | "activities";
 
 const QUESTIONS: { key: Multi; title: (b: string) => string; help: string; options: readonly { id: string; label: string }[]; max: number }[] = [
-  { key: "features", title: (b) => `Pick 3 things you adore about ${b}`, help: "Each one gets its own page.", options: FEATURES, max: LIMITS.features },
-  { key: "qualities", title: (b) => `Pick 4 words that describe ${b}`, help: "The qualities you love most.", options: QUALITIES, max: LIMITS.qualities },
-  { key: "activities", title: () => "Pick 4 things you love doing together", help: "Your favourite ways to spend time.", options: ACTIVITIES, max: LIMITS.activities },
+  { key: "features", title: () => "Выберите 3 вещи, которые вы обожаете в своей половинке", help: "Каждой достанется своя страница.", options: FEATURES, max: LIMITS.features },
+  { key: "qualities", title: () => "Выберите 4 черты характера, которые вы любите больше всего", help: "То, за что вы особенно цените этого человека.", options: QUALITIES, max: LIMITS.qualities },
+  { key: "activities", title: () => "Выберите 4 занятия, которые вы любите вместе", help: "Как вы больше всего любите проводить время.", options: ACTIVITIES, max: LIMITS.activities },
 ];
 
 export function QuizStep({
@@ -75,21 +75,21 @@ export function QuizStep({
   return (
     <>
       <div className="mx-auto max-w-3xl px-4 pt-8 sm:px-6">
-        <p className="text-sm font-semibold uppercase tracking-widest text-rose-dark">
-          Question {step + 1} of {total}
+        <p className="text-sm font-semibold text-muted">
+          Вопрос {step + 1} из {total}
         </p>
 
         {step === 0 && (
           <section>
-            <h1 className="mt-2 font-display text-3xl font-semibold text-plum sm:text-4xl">When did you two get together?</h1>
-            <p className="mt-2 text-muted">We&apos;ll count the years for you. You can skip this one.</p>
+            <h1 className="mt-2 font-display text-3xl font-semibold text-plum sm:text-4xl">С какого года вы вместе?</h1>
+            <p className="mt-2 text-muted">Годы посчитаем сами. Этот вопрос можно пропустить.</p>
             <select
               className="field mt-6 max-w-xs"
               value={a.since ?? ""}
               onChange={(e) => setA({ ...a, since: e.target.value ? Number(e.target.value) : null })}
-              aria-label="Year you got together"
+              aria-label="Год, когда вы начали встречаться"
             >
-              <option value="">Prefer not to say</option>
+              <option value="">Не указывать</option>
               {years.map((y) => (
                 <option key={y} value={y}>
                   {y}
@@ -103,7 +103,7 @@ export function QuizStep({
           <section>
             <h1 className="mt-2 font-display text-3xl font-semibold text-plum sm:text-4xl">{q.title(ctx.B)}</h1>
             <p className="mt-2 text-muted">
-              {q.help} <span className="font-medium text-plum">{(a[q.key] as string[]).length} of {q.max} chosen.</span>
+              {q.help} <span className="font-medium text-plum">Выбрано {(a[q.key] as string[]).length} из {q.max}.</span>
             </p>
             <div className="mt-6 flex flex-wrap gap-2.5">
               {q.options.map((o) => {
@@ -121,8 +121,8 @@ export function QuizStep({
 
         {step === 4 && (
           <section>
-            <h1 className="mt-2 font-display text-3xl font-semibold text-plum sm:text-4xl">Write a dedication</h1>
-            <p className="mt-2 text-muted">It goes on the first page. Start from an idea below or write your own.</p>
+            <h1 className="mt-2 font-display text-3xl font-semibold text-plum sm:text-4xl">Напишите посвящение</h1>
+            <p className="mt-2 text-muted">Оно будет на первой странице. Возьмите идею ниже или напишите своё.</p>
             <div className="mt-5 flex flex-col gap-2">
               {DEDICATION_TEMPLATES.map((t) => {
                 const text = fillText(t, ctx);
@@ -138,7 +138,7 @@ export function QuizStep({
               value={a.dedication}
               maxLength={LIMITS.dedication}
               onChange={(e) => setA({ ...a, dedication: e.target.value })}
-              aria-label="Dedication"
+              aria-label="Посвящение"
               placeholder={`To ${ctx.B}…`}
             />
             <p className="mt-1 text-right text-xs text-muted">
@@ -146,9 +146,9 @@ export function QuizStep({
             </p>
             {assembled && (
               <p className="mt-4 rounded-xl bg-blush/50 px-4 py-3 text-sm text-plum">
-                Finishing the questions again rebuilds your pages, so any page edits you made will be replaced.{" "}
+                Если пройти вопросы заново, страницы соберутся снова, и ваши правки страниц заменятся.{" "}
                 <Link href={stepHref(bookId, "edit")} className="font-semibold underline">
-                  Keep my current pages instead
+                  Оставить текущие страницы
                 </Link>
               </p>
             )}
@@ -156,21 +156,21 @@ export function QuizStep({
         )}
       </div>
 
-      <div className="sticky bottom-0 z-20 mt-10 border-t border-line bg-cream/95 backdrop-blur">
+      <div className="sticky bottom-0 z-20 mt-10 border-t border-line bg-white/95 backdrop-blur" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
           {step === 0 ? (
-            <Link href={stepHref(bookId, "cover")} className="btn btn-secondary !px-4 !py-2.5 text-sm">
-              Back
+            <Link href={stepHref(bookId, "cover")} className="btn btn-secondary !px-4 !py-2.5 text-sm" aria-label="Назад">
+              ←<span className="hidden sm:inline"> Назад</span>
             </Link>
           ) : (
-            <button type="button" className="btn btn-secondary !px-4 !py-2.5 text-sm" onClick={() => setStep(step - 1)}>
-              Back
+            <button type="button" className="btn btn-secondary !px-4 !py-2.5 text-sm" onClick={() => setStep(step - 1)} aria-label="Назад">
+              ←<span className="hidden sm:inline"> Назад</span>
             </button>
           )}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-1 items-center justify-end gap-3 sm:flex-none">
             {error && <span className="text-sm text-rose-dark">{error}</span>}
-            <button type="button" className="btn btn-primary !py-2.5" disabled={!valid[step] || busy} onClick={next}>
-              {busy ? "Building your book…" : step === total - 1 ? "Build my book" : "Next"}
+            <button type="button" className="btn btn-primary w-full !py-3 sm:w-auto sm:!py-2.5" disabled={!valid[step] || busy} onClick={next}>
+              {busy ? "Собираем книгу…" : step === total - 1 ? "Собрать книгу" : "Дальше"}
             </button>
           </div>
         </div>

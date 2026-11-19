@@ -8,7 +8,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const c = findCollection("recipient", (await params).slug);
-  return { title: c ? `Love books ${c.name.toLowerCase()}` : "Not found", description: c?.blurb };
+  return { title: c ? `Книга в подарок ${c.name.toLowerCase()}` : "Не найдено", description: c?.blurb };
 }
 
 export default async function RecipientPage({ params }: { params: Promise<{ slug: string }> }) {
