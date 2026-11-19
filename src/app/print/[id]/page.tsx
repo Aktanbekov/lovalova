@@ -9,7 +9,7 @@ export const metadata = { robots: { index: false, follow: false } };
 export default async function PrintPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ token?: string }> }) {
   const { id } = await params;
   const { token } = await searchParams;
-  const order = getOrder(id);
+  const order = await getOrder(id);
   if (!order || !verifyPrintToken(id, token)) notFound();
   const book = order.book;
   const sheet = "print-sheet";

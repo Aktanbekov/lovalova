@@ -1,11 +1,11 @@
 import Link from "next/link";
-import fs from "node:fs";
 import { BookMockup } from "@/components/book/BookMockup";
 import { AutoRefresh } from "@/components/site/AutoRefresh";
 import { loadOwnedOrder } from "@/lib/loadBook";
 import { stripe } from "@/lib/stripe";
 import { fulfillFromSession } from "@/lib/fulfill";
 import { getOrder } from "@/lib/store";
+import { pdfReady as isPdfReady } from "@/lib/pdf";
 import { money } from "@/lib/pricing";
 
 export const metadata = { title: "Спасибо за заказ" };
@@ -18,14 +18,14 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
   if (order.status !== "paid" && stripe && session_id && session_id === order.stripeSessionId) {
     try {
       const session = await stripe.checkout.sessions.retrieve(session_id);
-      if (fulfillFromSession(session)) order = getOrder(order.id)!;
+      if (await fulfillFromSession(session)) order = (await getOrder(order.id))!;
     } catch (err) {
       console.error("[lovalova] could not verify session", err);
     }
   }
 
   const paid = order.status === "paid";
-  const pdfReady = Boolean(order.pdfPath && fs.existsSync(order.pdfPath));
+  const pdfReady = isPdfReady(order.pdfPath);
   const b = order.book;
 
   return (

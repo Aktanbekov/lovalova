@@ -33,7 +33,7 @@ type Result<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 
 async function ownedBook(id: string): Promise<BookRow> {
   const owner = await readOwner();
-  const book = typeof id === "string" ? getBook(id) : null;
+  const book = typeof id === "string" ? await getBook(id) : null;
   if (!book || !owner || book.owner !== owner) throw new Error("Книга не найдена");
   return book;
 }
@@ -41,7 +41,7 @@ async function ownedBook(id: string): Promise<BookRow> {
 // ---------- starting a book ----------
 
 async function startBook(owner: string, form: FormData): Promise<never> {
-  const book = createBookWith(owner, bookFromPreset(readPreset((k) => form.get(k))));
+  const book = await createBookWith(owner, bookFromPreset(readPreset((k) => form.get(k))));
   refreshHeader();
   redirect(`/create/${book.id}/characters`);
 }
@@ -80,13 +80,13 @@ export async function authAction(_prev: AuthState, form: FormData): Promise<Auth
 
   let user;
   if (mode === "signup") {
-    if (findUserByEmail(email)) return { error: "Аккаунт с таким e-mail уже есть. Попробуйте войти." };
-    user = createUser(normalizeEmail(email), password, name || null, guestOwner);
+    if (await findUserByEmail(email)) return { error: "Аккаунт с таким e-mail уже есть. Попробуйте войти." };
+    user = await createUser(normalizeEmail(email), password, name || null, guestOwner);
   } else {
-    const found = findUserByEmail(email);
+    const found = await findUserByEmail(email);
     if (!found || !verifyPassword(password, found.passwordHash)) return { error: "Неверный e-mail или пароль." };
     user = found;
-    adoptGuestBooks(user, guestOwner);
+    await adoptGuestBooks(user, guestOwner);
   }
   await startSession(user);
   refreshHeader();
@@ -108,7 +108,7 @@ export type SubscribeState = { ok: true; code: string } | { ok: false; error: st
 export async function subscribeAction(_prev: SubscribeState, form: FormData): Promise<SubscribeState> {
   const email = z.email().max(200).safeParse(form.get("email"));
   if (!email.success) return { ok: false, error: "Введите корректный e-mail." };
-  addSubscriber(email.data, String(form.get("source") ?? "site").slice(0, 40));
+  await addSubscriber(email.data, String(form.get("source") ?? "site").slice(0, 40));
   return { ok: true, code: "WELCOME10" };
 }
 
@@ -117,12 +117,12 @@ export async function subscribeAction(_prev: SubscribeState, form: FormData): Pr
 export async function applyPromoAction(id: string, code: string | null): Promise<Result<{ promo?: Promo }>> {
   const book = await ownedBook(id);
   if (code === null || !code.trim()) {
-    saveBookData(id, { ...book.data, promo: null });
+    await saveBookData(id, { ...book.data, promo: null });
     return { ok: true };
   }
   const promo = findPromo(code);
   if (!promo) return { ok: false, error: `Промокод «${normalizeCode(code)}» не найден.` };
-  saveBookData(id, { ...book.data, promo: promo.code });
+  await saveBookData(id, { ...book.data, promo: promo.code });
   return { ok: true, promo };
 }
 
@@ -140,7 +140,7 @@ export async function saveBookAction(id: string, patch: unknown): Promise<Result
   }
   const next = BookDataSchema.safeParse({ ...book.data, ...p });
   if (!next.success) return { ok: false, error: "Не получилось сохранить изменения." };
-  saveBookData(id, next.data);
+  await saveBookData(id, next.data);
   return { ok: true };
 }
 
@@ -154,14 +154,14 @@ export async function finishQuizAction(id: string, answers: unknown): Promise<Re
     return { ok: false, error: "Ответьте на все вопросы." };
   }
   const pages = assemblePages(a, book.data.occasion);
-  saveBookData(id, { ...book.data, answers: a, pages, assembled: true, previewed: false });
+  await saveBookData(id, { ...book.data, answers: a, pages, assembled: true, previewed: false });
   return { ok: true };
 }
 
 export async function markPreviewedAction(id: string): Promise<Result> {
   const book = await ownedBook(id);
   if (!book.data.assembled) return { ok: false, error: "Сначала ответьте на вопросы." };
-  saveBookData(id, { ...book.data, previewed: true });
+  await saveBookData(id, { ...book.data, previewed: true });
   refreshHeader();
   return { ok: true };
 }
@@ -179,7 +179,7 @@ export async function checkoutAction(id: string): Promise<Result<{ url?: string;
   if (!d.characters[0].name.trim() || !d.characters[1].name.trim()) return { ok: false, error: "Укажите имена обоих героев." };
 
   const promo = findPromo(d.promo);
-  const order = createOrder(book, d.selection, totals(d.selection, promo).total);
+  const order = await createOrder(book, d.selection, totals(d.selection, promo).total);
 
   if (!stripe) {
     if (process.env.NODE_ENV === "production") return { ok: false, error: "Оплата пока не подключена." };
@@ -213,7 +213,7 @@ export async function checkoutAction(id: string): Promise<Result<{ url?: string;
       success_url: `${site}/checkout/success?order=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${site}/checkout/cancel?order=${order.id}`,
     });
-    setOrderSession(order.id, session.id);
+    await setOrderSession(order.id, session.id);
     return { ok: true, url: session.url ?? undefined };
   } catch (err) {
     console.error("[lovalova] Stripe checkout failed", err);
@@ -236,9 +236,9 @@ async function stripeCoupon(promo: Promo): Promise<string> {
 export async function simulatePaymentAction(orderId: string): Promise<Result> {
   if (process.env.NODE_ENV === "production" || stripe) return { ok: false, error: "Недоступно." };
   const owner = await readOwner();
-  const order = getOrder(orderId);
+  const order = await getOrder(orderId);
   if (!order || order.owner !== owner) return { ok: false, error: "Заказ не найден." };
-  markOrderPaid(orderId, {
+  await markOrderPaid(orderId, {
     email: "test@example.com",
     shipping: { address: { name: "Test Customer", address: { line1: "1 Test Street", city: "Testville", country: "US" } }, rate: "simulated" },
   });

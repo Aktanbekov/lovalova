@@ -10,7 +10,7 @@ export const metadata = { title: "Корзина" };
 
 export default async function CartIndex() {
   const owner = await readOwner();
-  const books = owner ? cartBooks(owner) : [];
+  const books = owner ? await cartBooks(owner) : [];
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
       <h1 className="font-display text-3xl font-semibold text-wine sm:text-5xl">Корзина</h1>

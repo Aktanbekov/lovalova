@@ -28,8 +28,8 @@ function FeatureTile({ couple, cover, title, label, text, href, tone }: { couple
 
 export async function SiteHeader() {
   const [user, owner] = await Promise.all([currentUser(), readOwner()]);
-  const draft = owner ? latestDraft(owner) : null;
-  const cartCount = owner ? cartBooks(owner).length : 0;
+  const draft = owner ? await latestDraft(owner) : null;
+  const cartCount = owner ? (await cartBooks(owner)).length : 0;
   const draftHref = draft && draft.status === "draft" ? `/create/${draft.id}/characters` : null;
 
   const menus: NavMenu[] = [

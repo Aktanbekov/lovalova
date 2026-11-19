@@ -42,12 +42,12 @@ export async function GET(req: Request) {
   if (!profile!.emailVerified) fail("google_unverified");
 
   const guestOwner = jar.get(OWNER_COOKIE)?.value ?? null;
-  const user = googleUser(profile!, guestOwner);
-  adoptGuestBooks(user, guestOwner);
+  const user = await googleUser(profile!, guestOwner);
+  await adoptGuestBooks(user, guestOwner);
   await startSession(user);
 
   if (pending!.next === "start") {
-    const book = createBookWith(user.owner, bookFromPreset(readPreset((k) => pending!.preset?.[k])));
+    const book = await createBookWith(user.owner, bookFromPreset(readPreset((k) => pending!.preset?.[k])));
     redirect(`/create/${book.id}/characters`);
   }
   redirect(safeNext(pending!.next));

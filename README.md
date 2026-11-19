@@ -60,14 +60,14 @@ npm run lint
 | Builder steps | `src/app/(site)/create/[id]/*`, `src/components/builder/*` |
 | Stripe webhook | `src/app/api/stripe/webhook/route.ts` |
 | Print layout + PDF | `src/app/print/[id]/page.tsx`, `src/lib/pdf.ts` |
-| Storage (Node's built-in SQLite) | `src/lib/db.ts`, `src/lib/store.ts` → `data/lovalova.db` |
+| Storage (libSQL: local SQLite file, or Turso in production) | `src/lib/db.ts`, `src/lib/store.ts` → `data/lovalova.db` |
 | Header, dropdown menus, promo bar, footer | `src/components/site/*` |
 | Occasion / recipient shop pages | `src/content/collections.ts`, `src/components/shop/CollectionPage.tsx` |
 | Sample couples for cover examples | `src/lib/demo.ts` |
 | Discount codes (every advertised code lives here and works) | `src/lib/promos.ts` |
 | Accounts and sessions | `src/lib/auth.ts`, `src/lib/password.ts`, Google: `src/lib/google.ts` |
 
-PDFs are written to `storage/pdfs/<orderId>.pdf` (8.5 × 5.5 in, cover + pages).
+PDFs (8.5 × 5.5 in, cover + pages) are written to `storage/pdfs/<orderId>.pdf` locally, or to Vercel Blob at `pdfs/<orderId>.pdf` when `BLOB_READ_WRITE_TOKEN` is set.
 
 Books belong to an "owner" id. Guests get one in an anonymous cookie (`ll_owner`); an account has its own. Signing up adopts the guest's books, and signing in moves any guest books in that browser into the account. Every action and route checks the owner before reading or changing a book or order. Each order stores a snapshot of the book, so later edits never change a paid order.
 
@@ -79,15 +79,29 @@ Discount codes are entered in the cart and taken off the book and extras (not sh
 
 ## Deploy to Vercel
 
-1. Import `github.com/Aktanbekov/lovalova` in Vercel (framework: Next.js, defaults are fine; Node 24 comes from `engines` in `package.json`).
-2. Add the environment variables from `.env.example` in Project → Settings → Environment Variables:
+Production storage: **Turso** (hosted libSQL, same SQLite schema) for data and **Vercel Blob** (private store) for PDFs. PDFs are rendered on Vercel with `@sparticuz/chromium`, a Chromium build made for serverless functions, after the payment response is sent (`after()` in `src/lib/fulfill.ts`).
+
+1. **Database.** Create a Turso database — either Vercel → Storage → Marketplace → Turso (sets the env vars for you), or with the Turso CLI:
+   ```bash
+   turso db create lovalova                     # add --from-file data/lovalova.db to copy local data
+   turso db show lovalova --url                 # → TURSO_DATABASE_URL
+   turso db tokens create lovalova              # → TURSO_AUTH_TOKEN
+   ```
+   Tables are created on first request.
+2. **PDF storage.** Vercel → Storage → Create → Blob, access **Private**, and connect it to the project (adds `BLOB_READ_WRITE_TOKEN`).
+3. **Import** `github.com/Aktanbekov/lovalova` in Vercel (framework: Next.js; Node 24 comes from `engines` in `package.json`).
+4. **Environment variables** (Project → Settings → Environment Variables), see `.env.example`:
+   - `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `BLOB_READ_WRITE_TOKEN` (from steps 1–2)
    - `NEXT_PUBLIC_SITE_URL` — your production URL, e.g. `https://lovalova.vercel.app` (if unset, the Vercel deployment URL is used)
    - `PRINT_TOKEN_SECRET` — a long random string (`openssl rand -hex 32`)
    - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — in Stripe, add a webhook endpoint `https://<your-domain>/api/stripe/webhook` for `checkout.session.completed` and `checkout.session.async_payment_succeeded`, and copy its signing secret
    - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (optional) — add `https://<your-domain>/api/auth/google/callback` as an authorized redirect URI
-3. Deploy.
+5. **Deploy.**
 
-**Limitations on Vercel today.** Storage is a SQLite file and PDFs are written to disk. Vercel functions only have a temporary `/tmp`, so on Vercel the app uses `/tmp/lovalova/` — it runs, but drafts, accounts and orders are per-instance and disappear on cold starts, and the PDF step (headless Chromium via `playwright-core`) can't launch there. Before taking real orders, move storage to a hosted database (e.g. Turso/libSQL, which keeps the SQLite schema, or Postgres), PDFs to object storage (e.g. Vercel Blob), and PDF rendering to a serverless Chromium build or a separate worker.
+Notes:
+- The PDF renderer opens `<NEXT_PUBLIC_SITE_URL>/print/<order>`. If Vercel Deployment Protection is on for preview deployments, that page returns 401 there and PDFs fail on previews; production domains are unaffected.
+- Without `TURSO_DATABASE_URL` on Vercel the app falls back to a SQLite file in `/tmp` (per-instance, wiped on cold start); without `BLOB_READ_WRITE_TOKEN` PDFs go to `/tmp` too. Fine for a quick look, not for real orders.
+- Locally nothing changes: no Turso/Blob variables → `data/lovalova.db` and `storage/pdfs/`.
 
 ## Not built yet
 

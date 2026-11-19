@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
   if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
-    fulfillFromSession(event.data.object);
+    await fulfillFromSession(event.data.object);
   }
   return NextResponse.json({ received: true });
 }

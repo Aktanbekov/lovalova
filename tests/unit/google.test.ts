@@ -92,23 +92,23 @@ describe("google accounts", () => {
   });
   afterAll(() => fs.rmSync(dir, { recursive: true, force: true }));
 
-  it("creates once, then finds by Google id", () => {
-    const a = auth.googleUser({ sub: "g-100", email: "New@Example.com", name: "Тимур" }, "guest-owner-1");
+  it("creates once, then finds by Google id", async () => {
+    const a = await auth.googleUser({ sub: "g-100", email: "New@Example.com", name: "Тимур" }, "guest-owner-1");
     expect(a.email).toBe("new@example.com");
     expect(a.owner).toBe("guest-owner-1"); // adopts the guest's books
-    const again = auth.googleUser({ sub: "g-100", email: "changed@example.com", name: null }, null);
+    const again = await auth.googleUser({ sub: "g-100", email: "changed@example.com", name: null }, null);
     expect(again.id).toBe(a.id);
   });
 
-  it("links to an existing password account with the same e-mail", () => {
-    const pw = auth.createUser("pair@example.com", "correct horse", null, null);
-    const g = auth.googleUser({ sub: "g-200", email: "PAIR@example.com", name: null }, null);
+  it("links to an existing password account with the same e-mail", async () => {
+    const pw = await auth.createUser("pair@example.com", "correct horse", null, null);
+    const g = await auth.googleUser({ sub: "g-200", email: "PAIR@example.com", name: null }, null);
     expect(g.id).toBe(pw.id);
   });
 
-  it("gives Google-only accounts no usable password", () => {
-    auth.googleUser({ sub: "g-300", email: "only@example.com", name: null }, null);
-    const u = auth.findUserByEmail("only@example.com")!;
+  it("gives Google-only accounts no usable password", async () => {
+    await auth.googleUser({ sub: "g-300", email: "only@example.com", name: null }, null);
+    const u = (await auth.findUserByEmail("only@example.com"))!;
     expect(auth.verifyPassword("", u.passwordHash)).toBe(false);
     expect(auth.verifyPassword("!", u.passwordHash)).toBe(false);
   });

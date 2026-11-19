@@ -19,8 +19,8 @@ function nextStep(b: BookRow) {
 
 export default async function AccountPage() {
   const [user, owner] = await Promise.all([currentUser(), readOwner()]);
-  const books = owner ? listBooks(owner) : [];
-  const orders = owner ? listOrders(owner) : [];
+  const books = owner ? await listBooks(owner) : [];
+  const orders = owner ? await listOrders(owner) : [];
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
